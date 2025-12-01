@@ -52,6 +52,26 @@ fun ProductManagementScreen(
                 }
             },
             actions = {
+                // Botón de sincronización
+                IconButton(onClick = { viewModel.syncWithServerManually() }) {
+                    Icon(Icons.Default.Sync,
+                         contentDescription = "Sincronizar con servidor",
+                         tint = if (viewModel.needsSync()) MaterialTheme.colorScheme.error
+                               else MaterialTheme.colorScheme.onSurface)
+                }
+                // BOTÓN TEMPORAL: Solucionar problema Cuadro Gojo
+                IconButton(
+                    onClick = {
+                        viewModel.solveCuadroGojoProblem()
+                        // También mostrar en logs que se ejecutó
+                        android.util.Log.d("ProductManagement", "🔧 Solucionando problema Cuadro Gojo...")
+                    }
+                ) {
+                    Icon(Icons.Default.Build,
+                         contentDescription = "Solucionar Cuadro Gojo",
+                         tint = MaterialTheme.colorScheme.error)
+                }
+                // Botón de añadir producto
                 IconButton(onClick = { showCreateDialog = true }) {
                     Icon(Icons.Default.Add, contentDescription = "Agregar producto")
                 }
@@ -120,7 +140,7 @@ fun ProductManagementScreen(
             product = selectedProduct!!,
             onDismiss = { showDeleteDialog = false },
             onConfirm = {
-                viewModel.deleteProduct(selectedProduct!!.id)
+                viewModel.deleteProductWithFeedback(selectedProduct!!.id, selectedProduct!!.name)
                 showDeleteDialog = false
                 selectedProduct = null
             }
@@ -323,7 +343,7 @@ fun CreateProductDialog(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        ProductType.values().forEach { productType ->
+                        ProductType.entries.forEach { productType ->
                             DropdownMenuItem(
                                 text = { Text(productType.name) },
                                 onClick = {
@@ -536,7 +556,20 @@ fun DeleteProductDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Eliminar Producto") },
-        text = { Text("¿Estás seguro de que quieres eliminar \"${product.name}\"? Esta acción no se puede deshacer.") },
+        text = {
+            Column {
+                Text("¿Estás seguro de que quieres eliminar \"${product.name}\"?")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "⚠️ Esta acción:",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Text("• Eliminará el producto de la base de datos")
+                Text("• Lo quitará de la página principal")
+                Text("• No se puede deshacer")
+            }
+        },
         confirmButton = {
             Button(
                 onClick = onConfirm,

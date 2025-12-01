@@ -247,7 +247,7 @@ class ClothingItemController(
                 ),
                 ClothingItemEntity(
                     id = "4",
-                    name = "Cuadro Gojo",
+                    name = "Cuadro Peneo",
                     description = "Cuadro decorativo minimalista con diseño de Satoru Gojo del anime Jujutsu Kaisen",
                     price = 35000.0,
                     imageUrl = "satorupolera",

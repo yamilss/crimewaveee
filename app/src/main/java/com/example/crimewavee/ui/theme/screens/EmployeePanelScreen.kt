@@ -5,9 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,6 +37,43 @@ fun EmployeePanelScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+                actions = {
+                    // Botón de sincronización
+                    IconButton(onClick = { clothingViewModel.syncWithServerManually() }) {
+                        Icon(
+                            Icons.Default.Sync,
+                            contentDescription = "Sincronizar",
+                            tint = if (clothingViewModel.needsSync()) MaterialTheme.colorScheme.error
+                                  else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    // BOTÓN DE PRUEBA API
+                    IconButton(
+                        onClick = {
+                            clothingViewModel.testApiIntegration()
+                            android.util.Log.d("EmployeePanel", "🧪 Iniciando pruebas de API...")
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.Science,
+                            contentDescription = "Probar API",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    // BOTÓN DE PRUEBA CREAR PRODUCTO
+                    IconButton(
+                        onClick = {
+                            clothingViewModel.testCreateProduct()
+                            android.util.Log.d("EmployeePanel", "🧪 Creando producto de prueba...")
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.AddCircle,
+                            contentDescription = "Crear producto de prueba",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
                     }
                 }
             )
@@ -138,7 +173,7 @@ fun EmployeePanelScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            clothingViewModel.removeProduct(product.id)
+                            clothingViewModel.deleteProductWithFeedback(product.id, product.name)
                             showDeleteDialog = null
                         }
                     ) {
@@ -187,7 +222,7 @@ fun EmployeePanelScreen(
                         onClick = {
                             val price = newPrice.toDoubleOrNull() ?: product.price
                             val stock = newStock.toIntOrNull() ?: product.stock
-                            clothingViewModel.updateProductLocal(product.copy(price = price, stock = stock))
+                            clothingViewModel.updateProductInService(product.copy(price = price, stock = stock))
                             showEditDialog = null
                         }
                     ) {
@@ -201,6 +236,8 @@ fun EmployeePanelScreen(
                 }
             )
         }
+
+
     }
 }
 

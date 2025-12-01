@@ -205,14 +205,6 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        OutlinedButton(
-                            onClick = { /* Ver inventario, de momento solo visual  */ },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Ver Inventario")
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
 
                         OutlinedButton(
                             onClick = onNavigateToStats,

@@ -1,10 +1,6 @@
 package com.example.crimewavee.ui.theme.screens
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,9 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,11 +23,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import com.example.crimewavee.data.model.ProductType
 import com.example.crimewavee.data.model.ClothingItem
 import com.example.crimewavee.ui.theme.viewmodel.ClothingViewModel
-import com.example.crimewavee.utils.ImageUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,47 +50,9 @@ fun ReportScreen(
     var sizeQuantity by remember { mutableStateOf("1") }
     var selectedSizes by remember { mutableStateOf(mutableMapOf<String, Int>()) }
 
-    var selectedImagePath by remember { mutableStateOf<String?>(null) }
-    var showImageDialog by remember { mutableStateOf(false) }
-    var photoUri by remember { mutableStateOf<Uri?>(null) }
+    var imageUrl by remember { mutableStateOf("") }
 
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            val bitmap = ImageUtils.getBitmapFromUri(context, it)
-            bitmap?.let { bmp ->
-                val fileName = "product_${System.currentTimeMillis()}"
-                val path = ImageUtils.compressAndSaveImage(context, bmp, fileName)
-                selectedImagePath = path
-            }
-        }
-    }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success: Boolean ->
-        if (success) {
-            photoUri?.let { uri ->
-                val bitmap = ImageUtils.getBitmapFromUri(context, uri)
-                bitmap?.let { bmp ->
-                    val fileName = "product_${System.currentTimeMillis()}"
-                    val path = ImageUtils.compressAndSaveImage(context, bmp, fileName)
-                    selectedImagePath = path
-                }
-            }
-        }
-    }
-
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            val photoFile = ImageUtils.createImageFile(context)
-            photoUri = ImageUtils.getUriForFile(context, photoFile)
-            cameraLauncher.launch(photoUri)
-        }
-    }
 
     val availableOptions = remember(selectedCategory) {
         when (selectedCategory) {
@@ -107,11 +65,20 @@ fun ReportScreen(
         selectedSizes.clear()
         selectedSize = availableOptions.first()
     }
-    var selectedImage by remember { mutableStateOf<String?>(null) }
 
     val isValidPrice = price.toDoubleOrNull()?.let { it >= 15000 } ?: false
     val isValidStock = stock.toIntOrNull()?.let { it >= 0 } ?: false
     val isValidSizeQuantity = sizeQuantity.toIntOrNull()?.let { it > 0 } ?: false
+
+    // Validación de URL de imagen
+    val isValidImageUrl = imageUrl.isBlank() || run {
+        val url = imageUrl.trim().lowercase()
+        (url.startsWith("http://") || url.startsWith("https://")) &&
+        (url.contains(".jpg") || url.contains(".jpeg") || url.contains(".png") ||
+         url.contains(".gif") || url.contains(".webp") || url.contains(".bmp") ||
+         url.contains("imgur.com") || url.contains("cdn.") || url.contains("cloudinary.com") ||
+         url.contains("amazonaws.com") || url.contains("googleusercontent.com"))
+    }
 
     Column(
         modifier = Modifier
@@ -673,7 +640,7 @@ fun ReportScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Imagen del Producto",
+                        text = "URL de la Imagen",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF424242)
@@ -688,53 +655,57 @@ fun ReportScreen(
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            OutlinedButton(
-                                onClick = {
-                                    showImageDialog = true
-                                },
-                                modifier = Modifier.padding(end = 12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = Color(0xFF424242)
-                                ),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text("Examinar...")
-                            }
-
-                            Column {
-                                Text(
-                                    text = if (selectedImagePath != null) "Imagen personalizada seleccionada" else "No se ha seleccionado ningún archivo",
-                                    color = if (selectedImagePath != null) Color(0xFF4CAF50) else Color.Gray,
-                                    fontSize = 13.sp
-                                )
-
-                                if (selectedImagePath != null) {
-                                    TextButton(
-                                        onClick = { selectedImagePath = null },
-                                        modifier = Modifier.padding(0.dp)
-                                    ) {
-                                        Text(
-                                            text = "Quitar imagen",
-                                            color = Color(0xFFFF5722),
-                                            fontSize = 11.sp
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        OutlinedTextField(
+                            value = imageUrl,
+                            onValueChange = { imageUrl = it },
+                            label = { Text("URL de la imagen") },
+                            placeholder = { Text("https://ejemplo.com/imagen.jpg") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            isError = imageUrl.isNotBlank() && !isValidImageUrl,
+                            supportingText = if (imageUrl.isNotBlank() && !isValidImageUrl) {
+                                { Text("URL inválida. Debe comenzar con http:// o https:// y contener una extensión de imagen válida (.jpg, .png, etc.)", color = MaterialTheme.colorScheme.error) }
+                            } else null,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = if (isValidImageUrl) Color(0xFF2196F3) else MaterialTheme.colorScheme.error,
+                                unfocusedBorderColor = if (isValidImageUrl) Color.Gray.copy(alpha = 0.3f) else MaterialTheme.colorScheme.error,
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black
+                            )
+                        )
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "Si no seleccionas una imagen, se usará una imagen predeterminada según la categoría.",
+                            text = "Introduce la URL completa de una imagen (debe comenzar con http:// o https://). Ejemplos: https://ejemplo.com/imagen.jpg o https://imgur.com/foto.png. Si no introduces ninguna URL, se usará una imagen predeterminada según la categoría.",
                             color = Color.Gray.copy(alpha = 0.8f),
                             fontSize = 11.sp,
                             lineHeight = 14.sp
                         )
+
+                        if (imageUrl.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "✓ URL configurada",
+                                    color = Color(0xFF4CAF50),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                TextButton(
+                                    onClick = { imageUrl = "" }
+                                ) {
+                                    Text(
+                                        text = "Limpiar",
+                                        color = Color(0xFFFF5722),
+                                        fontSize = 11.sp
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -770,17 +741,38 @@ fun ReportScreen(
                             val finalStock = stock.toIntOrNull() ?: 10
 
                             if (finalPrice == null || finalPrice < 15000) {
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "❌ El precio mínimo debe ser $15,000 CLP",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
                                 return@Button
                             }
 
                             if (finalStock < 0) {
-                                return@Button 
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "❌ El stock no puede ser negativo",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                                return@Button
                             }
 
-                            val productImageUrl = selectedImagePath ?: when (selectedCategory) {
-                                ProductType.POLERAS -> "satorupolera"
-                                ProductType.POLERONES -> "togahoodie"
-                                ProductType.CUADROS -> "givencuadro"
+                            // FEEDBACK VISUAL: Creando producto
+                            android.widget.Toast.makeText(
+                                context,
+                                "🚀 Creando producto: ${productName.trim()}...",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+
+                            val productImageUrl = if (imageUrl.isNotBlank()) {
+                                imageUrl.trim()
+                            } else {
+                                when (selectedCategory) {
+                                    ProductType.POLERAS -> "satorupolera"
+                                    ProductType.POLERONES -> "togahoodie"
+                                    ProductType.CUADROS -> "givencuadro"
+                                }
                             }
 
                             val newProduct = ClothingItem(
@@ -796,8 +788,39 @@ fun ReportScreen(
                                 stock = finalStock
                             )
 
+                            // CREAR EL PRODUCTO CON LOGS DETALLADOS
+                            android.util.Log.d("ReportScreen", "🚀 === CREANDO PRODUCTO ===")
+                            android.util.Log.d("ReportScreen", "📦 Nombre: ${newProduct.name}")
+                            android.util.Log.d("ReportScreen", "💰 Precio: ${newProduct.price}")
+                            android.util.Log.d("ReportScreen", "📊 Stock: ${newProduct.stock}")
+                            android.util.Log.d("ReportScreen", "🖼️ Imagen: ${newProduct.imageUrl}")
+
+                            clothingViewModel.createProductWithFeedback(newProduct) { success, message ->
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    if (success) {
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            "✅ ¡PRODUCTO CREADO EXITOSAMENTE EN SERVIDOR! Verificar en Postman.",
+                                            android.widget.Toast.LENGTH_LONG
+                                        ).show()
+                                    } else {
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            "❌ ERROR CREANDO PRODUCTO: $message",
+                                            android.widget.Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+                            }
+
                             onReportSubmitted()
                         } catch (e: Exception) {
+                            android.widget.Toast.makeText(
+                                context,
+                                "❌ Error: ${e.message}",
+                                android.widget.Toast.LENGTH_LONG
+                            ).show()
+                            android.util.Log.e("ReportScreen", "❌ Error creando producto: ${e.message}")
                             return@Button
                         }
                     },
@@ -812,6 +835,7 @@ fun ReportScreen(
                              price.isNotBlank() &&
                              isValidPrice &&
                              isValidStock &&
+                             isValidImageUrl &&
                              productName.trim().length <= 100 &&
                              description.trim().length <= 500,
                     shape = RoundedCornerShape(12.dp),
@@ -826,106 +850,226 @@ fun ReportScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = {
+                        android.widget.Toast.makeText(
+                            context,
+                            "🧪 Probando datos mínimos...",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+
+                        clothingViewModel.testMinimalCreation { success, message ->
+                            CoroutineScope(Dispatchers.Main).launch {
+                                if (success) {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "✅ DATOS MÍNIMOS OK: $message",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "❌ DATOS MÍNIMOS FALLAN: $message",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF607D8B)
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("🧪 DATOS MÍNIMOS", fontWeight = FontWeight.Bold, fontSize = 10.sp)
+                }
+
+                Button(
+                    onClick = {
+                        // CREAR PRODUCTO DE PRUEBA SIMPLE
+                        android.widget.Toast.makeText(
+                            context,
+                            "🧪 Creando producto de prueba...",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+
+                        val testProduct = ClothingItem(
+                            id = "test_${System.currentTimeMillis()}",
+                            name = "PRODUCTO DE PRUEBA DIRECTO",
+                            description = "Este es un producto creado para probar la conexión directa con la API",
+                            price = 20000.0,
+                            imageUrl = "https://via.placeholder.com/300x300.jpg",
+                            category = ProductType.POLERAS,
+                            isNew = true,
+                            isFeatured = false,
+                            sizes = listOf("S", "M", "L"),
+                            stock = 5
+                        )
+
+                        android.util.Log.d("ReportScreen", "🧪 === CREANDO PRODUCTO DE PRUEBA ===")
+                        android.util.Log.d("ReportScreen", "📦 ${testProduct.name}")
+                        android.util.Log.d("ReportScreen", "💰 Precio: ${testProduct.price}")
+                        android.util.Log.d("ReportScreen", "📊 Stock: ${testProduct.stock}")
+
+                        clothingViewModel.createProductWithFeedback(testProduct) { success, message ->
+                            CoroutineScope(Dispatchers.Main).launch {
+                                if (success) {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "✅ PRODUCTO CREADO EN SERVIDOR - Visible en Postman",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "❌ FALLÓ LA CREACIÓN - $message",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF9800)
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("🧪 CREAR PRODUCTO DE PRUEBA", fontWeight = FontWeight.Bold, fontSize = 10.sp)
+                }
+
+                Button(
+                    onClick = {
+                        // BOTÓN DE PRUEBA CON FEEDBACK VISUAL DIRECTO
+                        android.widget.Toast.makeText(
+                            context,
+                            "🧪 Probando conexión con servidor...",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+
+                        clothingViewModel.testServerConnectionWithFeedback { success, message ->
+                            CoroutineScope(Dispatchers.Main).launch {
+                                if (success) {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "✅ SERVIDOR FUNCIONANDO - Puedes crear productos",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "❌ SERVIDOR NO DISPONIBLE - $message",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }
+
+                        android.util.Log.d("ReportScreen", "🧪 Probando conexión API antes de crear producto...")
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50)
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("🧪 PROBAR CONEXIÓN", fontWeight = FontWeight.Bold, fontSize = 10.sp)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // ESTADO PARA EL DIÁLOGO DE ERROR
+            var showErrorDialog by remember { mutableStateOf(false) }
+            var errorTitle by remember { mutableStateOf("") }
+            var errorMessage by remember { mutableStateOf("") }
+
+            // BOTÓN DE DIAGNÓSTICO AVANZADO CON DIÁLOGO
+            Button(
+                onClick = {
+                    android.widget.Toast.makeText(
+                        context,
+                        "🔍 Ejecutando diagnóstico completo...",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+
+                    clothingViewModel.runAdvancedDiagnosticWithDialog(
+                        onSuccess = { mensaje ->
+                            CoroutineScope(Dispatchers.Main).launch {
+                                android.widget.Toast.makeText(
+                                    context,
+                                    mensaje,
+                                    android.widget.Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        },
+                        onError = { titulo, mensaje ->
+                            errorTitle = titulo
+                            errorMessage = mensaje
+                            showErrorDialog = true
+                        }
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF9C27B0)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("🔍 DIAGNÓSTICO COMPLETO", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            }
+
+            // DIÁLOGO DE ERROR DETALLADO
+            if (showErrorDialog) {
+                AlertDialog(
+                    onDismissRequest = { showErrorDialog = false },
+                    title = {
+                        Text(
+                            text = errorTitle,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = errorMessage,
+                            fontSize = 14.sp,
+                            lineHeight = 18.sp
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { showErrorDialog = false }
+                        ) {
+                            Text("ENTENDIDO", fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showErrorDialog = false
+                                // Copiar error a clipboard si es posible
+                                android.util.Log.d("ReportScreen", "Error copiable: $errorMessage")
+                            }
+                        ) {
+                            Text("VER LOGS")
+                        }
+                    }
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
 
-    if (showImageDialog) {
-        AlertDialog(
-            onDismissRequest = { showImageDialog = false },
-            title = {
-                Text("Seleccionar imagen del producto")
-            },
-            text = {
-                Column {
-                    Text("¿Cómo deseas agregar la imagen del producto?")
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = {
-                            showImageDialog = false
-                            when (PackageManager.PERMISSION_GRANTED) {
-                                ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA
-                                ) -> {
-                                    val photoFile = ImageUtils.createImageFile(context)
-                                    photoUri = ImageUtils.getUriForFile(context, photoFile)
-                                    cameraLauncher.launch(photoUri)
-                                }
-                                else -> {
-                                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2196F3)
-                        )
-                    ) {
-                        Icon(
-                            Icons.Default.CameraAlt,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Tomar foto")
-                    }
-
-                    Button(
-                        onClick = {
-                            showImageDialog = false
-                            galleryLauncher.launch("image/*")
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50)
-                        )
-                    ) {
-                        Icon(
-                            Icons.Default.Photo,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Elegir de galería")
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            showImageDialog = false
-                            selectedImagePath = null 
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    ) {
-                        Text("Usar imagen por defecto")
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        TextButton(
-                            onClick = { showImageDialog = false }
-                        ) {
-                            Text("Cancelar")
-                        }
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {}
-        )
-    }
 }
 
 private fun getCategoryDisplayText(category: ProductType): String {

@@ -1,0 +1,171 @@
+╔══════════════════════════════════════════════════════════╗
+║     🛠️ HTTP 400 BAD REQUEST - DIAGNÓSTICO MEJORADO       ║
+╚══════════════════════════════════════════════════════════╝
+
+🎯 PROBLEMA IDENTIFICADO:
+❌ Error creando en servidor: HTTP 400 BAD REQUEST
+❌ Causa probable: Datos del producto inválidos
+❌ Solución: Verificar formato de datos enviados
+
+✅ CAUSA REAL:
+🔍 Los datos que se envían al servidor tienen formato incorrecto
+🔍 El servidor rechaza el JSON por campos inválidos o faltantes
+
+╔══════════════════════════════════════════════════════════╗
+║              🔧 MEJORAS IMPLEMENTADAS                      ║
+╚══════════════════════════════════════════════════════════╝
+
+🛠️ 1. VALIDACIÓN PREVIA DE DATOS:
+   ✅ Verifica que el nombre no esté vacío
+   ✅ Verifica que la descripción no esté vacía
+   ✅ Verifica que el precio sea > 0
+   ✅ Verifica que el stock no sea negativo
+
+🛠️ 2. LOGGING JSON COMPLETO:
+   ✅ Muestra el JSON exacto que se envía al servidor
+   ✅ Serialización completa para debugging
+   ✅ Cada campo individual visible en logs
+
+🛠️ 3. ANÁLISIS ESPECÍFICO HTTP 400:
+   ✅ Detecta si el problema es con 'name'
+   ✅ Detecta si el problema es con 'price'
+   ✅ Detecta si el problema es con 'category'
+   ✅ Detecta campos requeridos faltantes
+   ✅ Detecta errores de validación
+
+🛠️ 4. DOBLE ENDPOINT SUPPORT:
+   ✅ Intenta primero sin ID (CreateClothingItemApiRequestNoId)
+   ✅ Si falla, intenta con ID temporal (CreateClothingItemApiRequest)
+   ✅ Compatibilidad máxima con diferentes servidores
+
+🛠️ 5. PRUEBA DE DATOS MÍNIMOS:
+   ✅ Nuevo botón "🧪 DATOS MÍNIMOS" (gris)
+   ✅ Envía solo datos básicos para probar formato
+   ✅ Identifica exactamente qué campo está mal
+
+╔══════════════════════════════════════════════════════════╗
+║                 🚀 CÓMO DIAGNOSTICAR AHORA                ║
+╚══════════════════════════════════════════════════════════╝
+
+1️⃣ COMPILAR Y EJECUTAR:
+   Build → Clean Project → Rebuild Project → Run
+
+2️⃣ IR AL FORMULARIO:
+   Login admin → Panel de Empleados → Botón "+"
+
+3️⃣ PROBAR EN ESTE ORDEN:
+
+   A) "🧪 DATOS MÍNIMOS" (botón gris):
+      → Envía producto super básico
+      → Si falla: problema con formato básico del servidor
+      → Si funciona: problema con tus datos específicos
+
+   B) "🧪 CREAR PRODUCTO DE PRUEBA" (botón naranja):
+      → Envía producto predefinido
+      → Compara resultado con datos mínimos
+
+   C) "🔍 DIAGNÓSTICO COMPLETO" (botón morado):
+      → Diagnóstico paso a paso completo
+      → Muestra diálogo con error detallado
+
+4️⃣ REVISAR LOGS DETALLADOS:
+   Android Studio → Logcat → Filtrar por "ProductRepository"
+
+╔══════════════════════════════════════════════════════════╗
+║                📊 LOGS QUE VERÁS AHORA                    ║
+╚══════════════════════════════════════════════════════════╝
+
+✅ VALIDACIÓN PREVIA:
+   🔍 "VALIDANDO DATOS ANTES DE ENVIAR..."
+   📋 "Nombre del producto no puede estar vacío" (si está vacío)
+   📋 "Precio debe ser mayor a 0. Valor actual: X" (si es 0 o negativo)
+
+✅ JSON COMPLETO:
+   📋 "REQUEST JSON COMPLETO:"
+   📋 "  {"
+   📋 "    \"name\": \"[tu nombre]\""
+   📋 "    \"price\": [tu precio]"
+   📋 "    \"category\": \"[tu categoría]\""
+   📋 "  }"
+   🔍 "JSON SERIALIZADO: {datos completos}"
+
+✅ ERROR HTTP 400 ESPECÍFICO:
+   🚫 "HTTP 400 BAD REQUEST DETECTADO:"
+   ❌ "Problema con el campo 'name'" (si es el nombre)
+   ❌ "Problema con el campo 'price'" (si es el precio)
+   ❌ "Campos requeridos faltantes" (si faltan campos)
+   📋 "RESPUESTA COMPLETA DEL SERVIDOR: [mensaje exacto]"
+
+╔══════════════════════════════════════════════════════════╗
+║              🔍 POSIBLES CAUSAS HTTP 400                   ║
+╚══════════════════════════════════════════════════════════╝
+
+🚫 CAMPO 'NAME':
+   Causa: Nombre vacío, demasiado largo, o caracteres especiales
+   Solución: Usar nombre simple sin caracteres especiales
+
+🚫 CAMPO 'PRICE':
+   Causa: Precio 0, negativo, o formato incorrecto
+   Solución: Usar precio >= 15000 como número
+
+🚫 CAMPO 'CATEGORY':
+   Causa: Categoría no válida en el servidor
+   Solución: Solo usar "POLERAS", "POLERONES", "CUADROS"
+
+🚫 CAMPO 'STOCK':
+   Causa: Stock negativo o formato incorrecto
+   Solución: Usar número entero >= 0
+
+🚫 CAMPO 'IMAGEURL':
+   Causa: URL mal formateada
+   Solución: Usar URL simple o texto plano
+
+🚫 CAMPOS REQUERIDOS:
+   Causa: El servidor requiere campos que no estamos enviando
+   Solución: Los logs mostrarán qué campos faltan
+
+╔══════════════════════════════════════════════════════════╗
+║                  🧪 PROCESO DE TESTING                     ║
+╚══════════════════════════════════════════════════════════╝
+
+🔬 PASO 1: DATOS MÍNIMOS
+   → Presiona "🧪 DATOS MÍNIMOS"
+   → Si FALLA: El servidor tiene problema con formato básico
+   → Si FUNCIONA: Tus datos específicos tienen el problema
+
+🔬 PASO 2: PRODUCTO DE PRUEBA
+   → Presiona "🧪 CREAR PRODUCTO DE PRUEBA"
+   → Compara resultado con datos mínimos
+   → Identifica diferencias
+
+🔬 PASO 3: TUS DATOS
+   → Llena formulario con datos simples
+   → Evita caracteres especiales
+   → Usa precios redondos (15000, 20000, etc.)
+
+🔬 PASO 4: ANÁLISIS DE LOGS
+   → Ve exactamente qué JSON se envía
+   → Compara con lo que funciona
+   → Identifica el campo problemático
+
+╔══════════════════════════════════════════════════════════╗
+║                   ✅ PRÓXIMOS PASOS                       ║
+╚══════════════════════════════════════════════════════════╝
+
+🎯 INMEDIATO:
+   1. Compila y ejecuta la app
+   2. Prueba "🧪 DATOS MÍNIMOS" primero
+   3. Revisa logs detallados en Android Studio
+   4. Identifica el campo específico que falla
+
+🎯 BASADO EN RESULTADO:
+   ✅ Si datos mínimos FUNCIONAN → Tu formulario tiene datos inválidos
+   ❌ Si datos mínimos FALLAN → Problema con configuración del servidor
+
+🎯 INFORMACIÓN PARA MI:
+   Cuando veas el resultado, comparte:
+   - ✅/❌ "🧪 DATOS MÍNIMOS" funcionó?
+   - 📋 Mensaje específico del error HTTP 400
+   - 📊 JSON exacto que se envía (de los logs)
+
+¡AHORA TENDREMOS INFORMACIÓN EXACTA DEL PROBLEMA! 🔍

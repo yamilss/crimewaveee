@@ -10,13 +10,18 @@ object ServerConfig {
     // Configuración de servidores
     private const val LOCAL_EMULATOR = "http://10.0.2.2:8080/"
     private const val LOCAL_DEVICE = "http://192.168.1.100:8080/" // Cambiar por tu IP local
-    private const val AWS_EC2 = "http://3.15.178.116:8080/" // ✅ IP DE EC2 CONFIGURADA
+    private const val AWS_EC2 = "http://3.21.53.102:8080/" // ✅ IP DE EC2 CONFIGURADA
 
     // ⚠️ INSTRUCCIÓN: Reemplaza TU-IP-EC2 con la IP pública de tu instancia EC2
     // Ejemplo: "http://52.123.45.67:8080/"
 
     fun getBaseUrl(): String {
-        // Intentar detectar automáticamente el mejor servidor
+        // FORZAR USO DE AWS EC2 SIEMPRE (solución para CLEARTEXT error)
+        Log.d(TAG, "🌐 Usando servidor AWS EC2 forzado: $AWS_EC2")
+        return AWS_EC2
+
+        // Código anterior comentado (detección automática que causaba problemas)
+        /*
         return try {
             when {
                 isEmulator() -> {
@@ -40,6 +45,7 @@ object ServerConfig {
             Log.e(TAG, "Error detectando servidor: ${e.message}")
             LOCAL_EMULATOR
         }
+        */
     }
 
     private fun isEmulator(): Boolean {

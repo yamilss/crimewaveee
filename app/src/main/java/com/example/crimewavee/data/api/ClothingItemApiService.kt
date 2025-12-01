@@ -50,6 +50,25 @@ data class CreateClothingItemApiRequest(
     val stock: Int = 0
 )
 
+data class CreateClothingItemApiRequestNoId(
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("description")
+    val description: String,
+    @SerializedName("price")
+    val price: Double,
+    @SerializedName("imageUrl")
+    val imageUrl: String,
+    @SerializedName("category")
+    val category: String,
+    @SerializedName("isNew")
+    val isNew: Boolean = false,
+    @SerializedName("isFeatured")
+    val isFeatured: Boolean = false,
+    @SerializedName("stock")
+    val stock: Int = 0
+)
+
 data class UpdateClothingItemApiRequest(
     @SerializedName("name")
     val name: String? = null,
@@ -97,6 +116,9 @@ interface ClothingItemApiService {
 
     @POST("api/products")
     suspend fun createProduct(@Body request: CreateClothingItemApiRequest): ClothingItemResponse
+
+    @POST("api/products")
+    suspend fun createProductNoId(@Body request: CreateClothingItemApiRequestNoId): ClothingItemResponse
 
     @PUT("api/products/{id}")
     suspend fun updateProduct(
