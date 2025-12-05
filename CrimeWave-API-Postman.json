@@ -1,0 +1,381 @@
+{
+  "info": {
+    "name": "CrimeWave API - Usuarios y Productos",
+    "description": "Colección completa de endpoints para usuarios y productos de CrimeWave",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 AUTENTICACIÓN",
+      "item": [
+        {
+          "name": "Login - Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin\",\n  \"password\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "http://{{HOST}}/api/users/login",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login - Usuario Regular",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hola\",\n  \"password\": \"hola\"\n}"
+            },
+            "url": {
+              "raw": "http://{{HOST}}/api/users/login",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar Nuevo Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevouser@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"555123456\",\n  \"rut\": \"33.333.333-3\",\n  \"isAdmin\": false\n}"
+            },
+            "url": {
+              "raw": "http://{{HOST}}/api/users/register",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "register"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 USUARIOS",
+      "item": [
+        {
+          "name": "Obtener Todos los Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/users",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/users/1",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Usuario por Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/users/email/admin",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "email",
+                "admin"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Administradores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/users/admins/list",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "admins",
+                "list"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Estadísticas de Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/users/stats/summary",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "stats",
+                "summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"newpassword123\",\n  \"phoneNumber\": \"555999888\"\n}"
+            },
+            "url": {
+              "raw": "http://{{HOST}}/api/users/1",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/users/3",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "3"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Inicializar Usuarios Predefinidos",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/users/init-default-users",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "init-default-users"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 PRODUCTOS",
+      "item": [
+        {
+          "name": "Obtener Todos los Productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/products",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Productos Destacados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/products/featured",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "featured"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"5\",\n  \"name\": \"Polera Naruto\",\n  \"description\": \"Polera con diseño de Naruto Uzumaki\",\n  \"price\": 25000.0,\n  \"imageUrl\": \"naruto\",\n  \"category\": \"POLERAS\",\n  \"isNew\": true,\n  \"isFeatured\": false,\n  \"stock\": 40\n}"
+            },
+            "url": {
+              "raw": "http://{{HOST}}/api/products",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/products/5",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "5"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Inicializar Productos de Prueba",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://{{HOST}}/api/products/init-sample-data",
+              "protocol": "http",
+              "host": [
+                "{{HOST}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "init-sample-data"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "HOST",
+      "value": "3.21.53.102:8080",
+      "type": "string"
+    }
+  ]
+}
+
