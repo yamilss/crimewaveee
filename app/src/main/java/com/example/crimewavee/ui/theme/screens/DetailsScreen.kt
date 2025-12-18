@@ -145,6 +145,10 @@ fun DetailsScreen(
                 }
             }
 
+            if (selectedProduct.category != ProductType.CUADROS) {
+                CombinedRecommendationSection()
+            }
+
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -257,7 +261,7 @@ fun DetailsScreen(
                         
                         if (cartViewModel.isCurrentUserAdmin()) {
                             Text(
-                                text = "* Los administradores ven vista previa - no agregan productos realmente",
+                                text = "",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray,
                                 modifier = Modifier.padding(top = 8.dp)
@@ -543,6 +547,146 @@ private fun ProductImageGallery(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CombinedRecommendationSection() {
+    var heightExpanded by remember { mutableStateOf(false) }
+    var weightExpanded by remember { mutableStateOf(false) }
+    var selectedHeightRange by remember { mutableStateOf<String?>(null) }
+    var selectedWeightRange by remember { mutableStateOf<String?>(null) }
+
+    val heightRanges = listOf(
+        "1.50cm-1.60cm" to "S",
+        "1.61cm-1.73cm" to "M",
+        "1.74cm-1.84cm" to "L",
+        "1.85cm-1.96cm" to "XL"
+    )
+
+    val weightRanges = listOf(
+        "45kg-55kg" to "S",
+        "56kg-70kg" to "M",
+        "71kg-85kg" to "XL",
+        "86kg-100kg" to "XL o no comprar"
+    )
+
+    Card {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "¿Necesitas ayuda?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Selector de Estatura
+            ExposedDropdownMenuBox(
+                expanded = heightExpanded,
+                onExpandedChange = { heightExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = selectedHeightRange ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Selecciona tu altura") },
+                    placeholder = { Text("Estatura") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = heightExpanded) },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = heightExpanded,
+                    onDismissRequest = { heightExpanded = false }
+                ) {
+                    heightRanges.forEach { (range, recommendedSize) ->
+                        DropdownMenuItem(
+                            text = { Text(range) },
+                            onClick = {
+                                selectedHeightRange = range
+                                heightExpanded = false
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
+                }
+            }
+
+            // Mostrar recomendación de estatura
+            selectedHeightRange?.let { range ->
+                val recommendedSize = heightRanges.find { it.first == range }?.second
+                if (recommendedSize != null) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "✨ Usuarios con esa estatura eligieron la talla: $recommendedSize",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF4CAF50), // Verde
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Selector de Peso
+            ExposedDropdownMenuBox(
+                expanded = weightExpanded,
+                onExpandedChange = { weightExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = selectedWeightRange ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Selecciona tu peso") },
+                    placeholder = { Text("Peso") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = weightExpanded) },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = weightExpanded,
+                    onDismissRequest = { weightExpanded = false }
+                ) {
+                    weightRanges.forEach { (range, recommendedSize) ->
+                        DropdownMenuItem(
+                            text = { Text(range) },
+                            onClick = {
+                                selectedWeightRange = range
+                                weightExpanded = false
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
+                }
+            }
+
+            // Mostrar recomendación de peso
+            selectedWeightRange?.let { range ->
+                val recommendedSize = weightRanges.find { it.first == range }?.second
+                if (recommendedSize != null) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "⚖️ Usuarios con ese peso recomiendan: $recommendedSize",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF2196F3), // Azul
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
+            }
         }
     }
 }

@@ -267,7 +267,7 @@ fun ShippingAddressScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Ciudad *",
+                        text = "Comuna *",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.Black,

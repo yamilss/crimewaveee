@@ -21,14 +21,6 @@
             </PendingDiffInfo>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml" />
-              <option name="updatedContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;network-security-config&gt;&#10;    &lt;!-- Permitir tráfico HTTP para el servidor AWS EC2 específico --&gt;&#10;    &lt;domain-config cleartextTrafficPermitted=&quot;true&quot;&gt;&#10;        &lt;domain includeSubdomains=&quot;false&quot;&gt;3.21.53.102&lt;/domain&gt;&#10;        &lt;domain includeSubdomains=&quot;false&quot;&gt;10.0.2.2&lt;/domain&gt;&#10;        &lt;domain includeSubdomains=&quot;false&quot;&gt;192.168.1.100&lt;/domain&gt;&#10;        &lt;domain includeSubdomains=&quot;false&quot;&gt;localhost&lt;/domain&gt;&#10;    &lt;/domain-config&gt;&#10;    &#10;    &lt;!-- Configuración base: Por defecto no permitir cleartext --&gt;&#10;    &lt;base-config cleartextTrafficPermitted=&quot;false&quot;&gt;&#10;        &lt;trust-anchors&gt;&#10;            &lt;certificates src=&quot;system&quot;/&gt;&#10;        &lt;/trust-anchors&gt;&#10;    &lt;/base-config&gt;&#10;&lt;/network-security-config&gt;" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
       </map>
     </option>
   </component>
